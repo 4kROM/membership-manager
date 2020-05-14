@@ -22,7 +22,7 @@ HEALTHCHECK_FILE= '/healthcheck/manager-ready'
 def add_worker(conn, host):
     cur = conn.cursor()
     worker_dict = ({'host': host, 'port': 5432})
-
+    sleep(10)
     print("adding %s" % host, file=stderr)
     cur.execute("""SELECT master_add_node(%(host)s, %(port)s)""", worker_dict)
 
@@ -31,9 +31,9 @@ def add_worker(conn, host):
 def remove_worker(conn, host):
     cur = conn.cursor()
     worker_dict = ({'host': host, 'port': 5432})
-
+    sleep(10)
     print("removing %s" % host, file=stderr)
-    cur.execute("""DELETE FROM pg_dist_placement WHERE groupid = (SELECT groupid FROM 
+    cur.execute("""DELETE FROM pg_dist_placement WHERE groupid = (SELECT groupid FROM
                    pg_dist_node WHERE nodename = %(host)s AND nodeport = %(port)s LIMIT 1);
                    SELECT master_remove_node(%(host)s, %(port)s)""", worker_dict)
 
@@ -58,7 +58,7 @@ def connect_to_master():
             sleep(1)
         except (Exception, psycopg2.Error) as error:
             raise error
-        
+
     conn.autocommit = True
 
     print("connected to %s" % citus_host, file=stderr)
